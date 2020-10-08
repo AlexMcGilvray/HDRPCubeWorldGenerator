@@ -135,15 +135,13 @@ public class World : MonoBehaviour
 {
     public GameObject cellTemplate;
     public int Dimensions = 20;
-    public int CellSize = 10;
+    public float CellSize = 10;
     // how long each step animates
     public float AnimTimeTarget = 1;
 
     public int WorldGenerationInitialHealth = 5;
     public float WorldGenerationInitialHeight = 50;
     public List<GameObject> cellObjects;
-
-        public float Height ;
 
     public float HeightDegredationMin = 1;
 
@@ -159,7 +157,7 @@ public class World : MonoBehaviour
         InitWorldGeneration(Dimensions / 2, Dimensions / 2);
     }
 
-    GameObject GetCell(int x, int z) => cellObjects[z * CellSize + x];
+    //GameObject GetCell(int x, int z) => cellObjects[z * Dimensions + x];
 
     bool AreAnyBuildersAlive() => _builders.Any(x => x.Alive);
 
@@ -206,7 +204,6 @@ public class World : MonoBehaviour
         if (x >= 0 && x < Dimensions && z >= 0 && z < Dimensions)
         {
             var worldBuilder = new WorldBuilder(this, x, z, height, health, direction);
-            worldBuilder.Height = Height;
             worldBuilder.HeightDegredationMax = HeightDegredationMax;
             worldBuilder.HeightDegredationMin = HeightDegredationMin;
             _builders.Add(worldBuilder);

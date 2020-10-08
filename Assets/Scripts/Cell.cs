@@ -51,7 +51,7 @@ public class Cell : MonoBehaviour
         }
     }
 
-    public void MakeCube(float height, int side, float animTime = 1)
+    public void MakeCube(float height, float side, float animTime = 1)
     {
         Height = height;
         animTimeTarget = animTime;
