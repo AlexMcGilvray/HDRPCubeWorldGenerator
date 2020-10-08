@@ -191,7 +191,7 @@ public class World : MonoBehaviour
         var cellObject = Instantiate(cellTemplate, coord, Quaternion.identity);
         cellObjects[z * Dimensions + x] = cellObject;
         var cell = cellObject.GetComponent<Cell>();
-        cell.MakeCube(height, CellSize / 2, AnimTimeTarget);
+        cell.MakeCell(height, CellSize / 2, AnimTimeTarget);
     }
 
     public void MakeWorldBuilder(

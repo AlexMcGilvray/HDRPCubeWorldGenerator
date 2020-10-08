@@ -108,13 +108,13 @@ public class Cell : MonoBehaviour
 
 
 
-    public void MakeCube(float height, float side, float animTime = 1)
+    public void MakeCell(float height, float side, float animTime = 1)
     {
         const int NumIndexesPerQuad = 6;
         int currentIndexBase = 0;
 
         const int NumNormalsPerQuad = 4;
-        int currentNormalBase = 0;
+        int currentQuadBase = 0;
 
         Height = height;
         animTimeTarget = animTime;
@@ -152,9 +152,9 @@ public class Cell : MonoBehaviour
         // vertices[7].y = 0;
         // vertices[7].z = -side;
 
-        vertices[0].x = -side;
-        vertices[0].y = 0;
-        vertices[0].z = side;
+        vertices[currentQuadBase + 0].x = -side;
+        vertices[currentQuadBase + 0].y = 0;
+        vertices[currentQuadBase + 0].z = side;
 
         vertices[1].x = side;
         vertices[1].y = 0;
@@ -180,11 +180,11 @@ public class Cell : MonoBehaviour
         Vector3 vertexNormal = Vector3.Cross(vertices[0] - vertices[3], vertices[1] - vertices[3]);
         vertexNormal.Normalize();
 
-        currentNormalBase = NumNormalsPerQuad * 0;
-        normals[currentNormalBase + 0] = vertexNormal;
-        normals[currentNormalBase + 1] = vertexNormal;
-        normals[currentNormalBase + 2] = vertexNormal;
-        normals[currentNormalBase + 3] = vertexNormal;
+        currentQuadBase = NumNormalsPerQuad * 0;
+        normals[currentQuadBase + 0] = vertexNormal;
+        normals[currentQuadBase + 1] = vertexNormal;
+        normals[currentQuadBase + 2] = vertexNormal;
+        normals[currentQuadBase + 3] = vertexNormal;
 
         uv[0] = new Vector2(0, 0);
         uv[1] = new Vector2(1, 0);
