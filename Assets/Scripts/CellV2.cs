@@ -155,6 +155,7 @@ public class CellV2 : MonoBehaviour
 
     public void MakeFace(CellV2FaceDirection direction, int indexBase, int quadBase)
     {
+        Debug.Log("quad base is " + quadBase + " and index base is " + indexBase);
         // add render vertices
         // add uv's
         // add normals
@@ -191,33 +192,142 @@ public class CellV2 : MonoBehaviour
                     _renderUVs[quadBase + 1] = new Vector2(1, 0);
                     _renderUVs[quadBase + 2] = new Vector2(0, 1);
                     _renderUVs[quadBase + 3] = new Vector2(1, 1);
+
+                    _renderIndices[indexBase + 0] = quadBase + 3;
+                    _renderIndices[indexBase + 1] = quadBase + 0;
+                    _renderIndices[indexBase + 2] = quadBase + 1;
+                    _renderIndices[indexBase + 3] = quadBase + 2;
+                    _renderIndices[indexBase + 4] = quadBase + 3;
+                    _renderIndices[indexBase + 5] = quadBase + 1;
                 }
 
                 break;
 
             case CellV2FaceDirection.North:
+                {
+                    const int localoffset1 = 0;
+                    const int localoffset2 = 1;
+                    const int localoffset3 = 4;
+                    const int localoffset4 = 5;
 
+                    _renderVertices[quadBase + 0] = _logicalVertices[localoffset1];
+                    _renderVertices[quadBase + 1] = _logicalVertices[localoffset2];
+                    _renderVertices[quadBase + 2] = _logicalVertices[localoffset3];
+                    _renderVertices[quadBase + 3] = _logicalVertices[localoffset4];
+
+                    faceInfo.LogicalVertexIndices[0] = localoffset1;
+                    faceInfo.LogicalVertexIndices[1] = localoffset2;
+                    faceInfo.LogicalVertexIndices[2] = localoffset3;
+                    faceInfo.LogicalVertexIndices[3] = localoffset4;
+
+                    _renderUVs[quadBase + 0] = new Vector2(0, 0);
+                    _renderUVs[quadBase + 1] = new Vector2(1, 0);
+                    _renderUVs[quadBase + 2] = new Vector2(0, 1);
+                    _renderUVs[quadBase + 3] = new Vector2(1, 1);
+
+                    _renderIndices[indexBase + 0] = quadBase + 2;
+                    _renderIndices[indexBase + 1] = quadBase + 1;
+                    _renderIndices[indexBase + 2] = quadBase + 0;
+                    _renderIndices[indexBase + 3] = quadBase + 2;
+                    _renderIndices[indexBase + 4] = quadBase + 3;
+                    _renderIndices[indexBase + 5] = quadBase + 1;
+                }
                 break;
 
             case CellV2FaceDirection.South:
+                {
+                    const int localoffset1 = 2;
+                    const int localoffset2 = 3;
+                    const int localoffset3 = 6;
+                    const int localoffset4 = 7;
 
+                    _renderVertices[quadBase + 0] = _logicalVertices[localoffset1];
+                    _renderVertices[quadBase + 1] = _logicalVertices[localoffset2];
+                    _renderVertices[quadBase + 2] = _logicalVertices[localoffset3];
+                    _renderVertices[quadBase + 3] = _logicalVertices[localoffset4];
+
+                    faceInfo.LogicalVertexIndices[0] = localoffset1;
+                    faceInfo.LogicalVertexIndices[1] = localoffset2;
+                    faceInfo.LogicalVertexIndices[2] = localoffset3;
+                    faceInfo.LogicalVertexIndices[3] = localoffset4;
+
+                    _renderUVs[quadBase + 0] = new Vector2(0, 0);
+                    _renderUVs[quadBase + 1] = new Vector2(1, 0);
+                    _renderUVs[quadBase + 2] = new Vector2(0, 1);
+                    _renderUVs[quadBase + 3] = new Vector2(1, 1);
+
+                    _renderIndices[indexBase + 0] = quadBase + 2;
+                    _renderIndices[indexBase + 1] = quadBase + 1;
+                    _renderIndices[indexBase + 2] = quadBase + 0;
+                    _renderIndices[indexBase + 3] = quadBase + 2;
+                    _renderIndices[indexBase + 4] = quadBase + 3;
+                    _renderIndices[indexBase + 5] = quadBase + 1;
+                }
                 break;
 
             case CellV2FaceDirection.East:
+                {
+                    const int localoffset1 = 1;
+                    const int localoffset2 = 2;
+                    const int localoffset3 = 5;
+                    const int localoffset4 = 6;
 
+                    _renderVertices[quadBase + 0] = _logicalVertices[localoffset1];
+                    _renderVertices[quadBase + 1] = _logicalVertices[localoffset2];
+                    _renderVertices[quadBase + 2] = _logicalVertices[localoffset3];
+                    _renderVertices[quadBase + 3] = _logicalVertices[localoffset4];
+
+                    faceInfo.LogicalVertexIndices[0] = localoffset1;
+                    faceInfo.LogicalVertexIndices[1] = localoffset2;
+                    faceInfo.LogicalVertexIndices[2] = localoffset3;
+                    faceInfo.LogicalVertexIndices[3] = localoffset4;
+
+                    _renderUVs[quadBase + 0] = new Vector2(0, 0);
+                    _renderUVs[quadBase + 1] = new Vector2(1, 0);
+                    _renderUVs[quadBase + 2] = new Vector2(0, 1);
+                    _renderUVs[quadBase + 3] = new Vector2(1, 1);
+
+                    _renderIndices[indexBase + 0] = quadBase + 2;
+                    _renderIndices[indexBase + 1] = quadBase + 1;
+                    _renderIndices[indexBase + 2] = quadBase + 0;
+                    _renderIndices[indexBase + 3] = quadBase + 2;
+                    _renderIndices[indexBase + 4] = quadBase + 3;
+                    _renderIndices[indexBase + 5] = quadBase + 1;
+                }
                 break;
 
             case CellV2FaceDirection.West:
+                {
+                    const int localoffset1 = 0;
+                    const int localoffset2 = 3;
+                    const int localoffset3 = 4;
+                    const int localoffset4 = 7;
 
+                    _renderVertices[quadBase + 0] = _logicalVertices[localoffset1];
+                    _renderVertices[quadBase + 1] = _logicalVertices[localoffset2];
+                    _renderVertices[quadBase + 2] = _logicalVertices[localoffset3];
+                    _renderVertices[quadBase + 3] = _logicalVertices[localoffset4];
+
+                    faceInfo.LogicalVertexIndices[0] = localoffset1;
+                    faceInfo.LogicalVertexIndices[1] = localoffset2;
+                    faceInfo.LogicalVertexIndices[2] = localoffset3;
+                    faceInfo.LogicalVertexIndices[3] = localoffset4;
+
+                    _renderUVs[quadBase + 0] = new Vector2(0, 0);
+                    _renderUVs[quadBase + 1] = new Vector2(1, 0);
+                    _renderUVs[quadBase + 2] = new Vector2(0, 1);
+                    _renderUVs[quadBase + 3] = new Vector2(1, 1);
+
+                    _renderIndices[indexBase + 0] = quadBase + 2;
+                    _renderIndices[indexBase + 1] = quadBase + 0;
+                    _renderIndices[indexBase + 2] = quadBase + 1;
+                    _renderIndices[indexBase + 3] = quadBase + 2;
+                    _renderIndices[indexBase + 4] = quadBase + 1;
+                    _renderIndices[indexBase + 5] = quadBase + 3;
+                }
                 break;
         }
 
-        _renderIndices[indexBase + 0] = 3;
-        _renderIndices[indexBase + 1] = 0;
-        _renderIndices[indexBase + 2] = 1;
-        _renderIndices[indexBase + 3] = 2;
-        _renderIndices[indexBase + 4] = 3;
-        _renderIndices[indexBase + 5] = 1;
 
         Vector3 vertexNormal = Vector3.Cross(
             _renderVertices[quadBase + 0] - _renderVertices[quadBase + 3],
@@ -232,7 +342,6 @@ public class CellV2 : MonoBehaviour
         faceInfo.Normal = vertexNormal;
 
         _faceInfos.Add(direction, faceInfo);
-
     }
 
     void Update()
@@ -242,7 +351,8 @@ public class CellV2 : MonoBehaviour
             _heightAnimationTimeCurrent -= Time.deltaTime;
             _heightAnimationTimeCurrent = Mathf.Clamp(_heightAnimationTimeCurrent, 0f, _heightAnimationTimeTarget);
             float currentHeight = 1 - (_heightAnimationTimeCurrent / _heightAnimationTimeTarget) * _height;
-
+            var topRenderVertices = GetAllTopRenderVertices();
+            Debug.Log("vertex count  is " + topRenderVertices.Count);
             foreach (var renderVertexIndex in GetAllTopRenderVertices())
             {
                 _renderVertices[renderVertexIndex].y = currentHeight;
@@ -261,10 +371,10 @@ public class CellV2 : MonoBehaviour
         new Dictionary<CellV2FaceDirection, FaceInfo>();
     private float _height;
     // render model data
-    private Vector3[] _renderVertices = new Vector3[20]; // 5 faces with 4 vertices each
-    private Vector3[] _renderNormals = new Vector3[20];
-    private Vector2[] _renderUVs = new Vector2[20];
-    private int[] _renderIndices = new int[30]; // 5 faces * (2 triangles * 3 indices)
+    public Vector3[] _renderVertices = new Vector3[20]; // 5 faces with 4 vertices each
+    public Vector3[] _renderNormals = new Vector3[20];
+    public Vector2[] _renderUVs = new Vector2[20];
+    public int[] _renderIndices = new int[30]; // 5 faces * (2 triangles * 3 indices)
     private MeshFilter _meshFilter;
     private Mesh _mesh;
     private MeshRenderer _meshRenderer;
