@@ -190,7 +190,7 @@ public class World : MonoBehaviour
         Vector3 coord = new Vector3(xCoord, 0, zCoord);
         var cellObject = Instantiate(cellTemplate, coord, Quaternion.identity);
         cellObjects[z * Dimensions + x] = cellObject;
-        var cell = cellObject.GetComponent<Cell>();
+        var cell = cellObject.GetComponent<CellV2>();
         cell.MakeCell(height, CellSize / 2, AnimTimeTarget);
     }
 
