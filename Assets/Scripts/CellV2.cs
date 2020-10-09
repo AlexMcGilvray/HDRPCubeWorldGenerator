@@ -149,6 +149,7 @@ public class CellV2 : MonoBehaviour
 
         _meshFilter.mesh = _mesh;
 
+
         _heightAnimationTimeCurrent = animTime;
         _heightAnimationTimeTarget = animTime;
     }
@@ -342,6 +343,7 @@ public class CellV2 : MonoBehaviour
         faceInfo.Normal = vertexNormal;
 
         _faceInfos.Add(direction, faceInfo);
+
     }
 
     void Update()
@@ -369,7 +371,8 @@ public class CellV2 : MonoBehaviour
 
             if (_mesh != null)
             {
-                _mesh.vertices = _renderVertices;
+                _meshFilter.mesh.vertices = _renderVertices;
+                _meshFilter.mesh.RecalculateBounds();
             }
         }
     }
@@ -385,7 +388,8 @@ public class CellV2 : MonoBehaviour
     private Vector2[] _renderUVs = new Vector2[20];
     private int[] _renderIndices = new int[30]; // 5 faces * (2 triangles * 3 indices)
     private MeshFilter _meshFilter;
-    private Mesh _mesh;
+    // we may not actuall want to store this because it appears the meshfilter copies it
+    private Mesh _mesh; 
     private MeshRenderer _meshRenderer;
     //animation data
     private float _heightAnimationTimeCurrent = 0f;
