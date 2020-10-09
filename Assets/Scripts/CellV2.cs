@@ -204,6 +204,10 @@ public class CellV2 : MonoBehaviour
         _renderNormals[quadBase + 2] = vertexNormal;
         _renderNormals[quadBase + 3] = vertexNormal;
 
+        faceInfo.Normal = vertexNormal;
+
+        _faceInfos.Add(direction,faceInfo);
+
     }
 
     void Update()
