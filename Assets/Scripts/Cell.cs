@@ -299,6 +299,5 @@ public class Cell : MonoBehaviour
                 mesh.vertices = vertices;
             }
         }
-        
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public enum CellV2FaceDirection
 {
@@ -21,6 +22,7 @@ public class FaceInfo
 public class CellV2 : MonoBehaviour
 {
     public Material worldMaterial;
+
 
     void Start()
     {
@@ -46,7 +48,27 @@ public class CellV2 : MonoBehaviour
         }
     }
 
-    public void MakeCell(float height, float size,  float animTime = 1f)
+    List<int> GetAllTopRenderVertices()
+    {
+        List<int> _topFaceVertexIndices = new List<int>();
+        var faces = _faceInfos.Select(x => x.Value);
+
+        foreach (var face in faces)
+        {
+            // the top vertices are the first 4 logical vertices
+            for (int i = 0; i < face.LogicalVertexIndices.Length; ++i)
+            {
+                if (face.LogicalVertexIndices[i] < 4)
+                {
+                    _topFaceVertexIndices.Add(face.RenderVertexIndices[i]);
+                }
+            }
+        }
+
+        return _topFaceVertexIndices;
+    }
+
+    public void MakeCell(float height, float size, float animTime = 1f)
     {
         _height = height;
 
@@ -126,6 +148,9 @@ public class CellV2 : MonoBehaviour
         }
 
         _meshFilter.mesh = _mesh;
+
+        _heightAnimationTimeCurrent = animTime;
+        _heightAnimationTimeTarget = animTime;
     }
 
     public void MakeFace(CellV2FaceDirection direction, int indexBase, int quadBase)
@@ -206,14 +231,30 @@ public class CellV2 : MonoBehaviour
 
         faceInfo.Normal = vertexNormal;
 
-        _faceInfos.Add(direction,faceInfo);
+        _faceInfos.Add(direction, faceInfo);
 
     }
 
     void Update()
     {
+        if (_heightAnimationTimeCurrent > 0f)
+        {
+            _heightAnimationTimeCurrent -= Time.deltaTime;
+            _heightAnimationTimeCurrent = Mathf.Clamp(_heightAnimationTimeCurrent, 0f, _heightAnimationTimeTarget);
+            float currentHeight = 1 - (_heightAnimationTimeCurrent / _heightAnimationTimeTarget) * _height;
 
+            foreach (var renderVertexIndex in GetAllTopRenderVertices())
+            {
+                _renderVertices[renderVertexIndex].y = currentHeight;
+            }
+
+            if (_mesh != null)
+            {
+                _mesh.vertices = _renderVertices;
+            }
+        }
     }
+
     // logical model data
     private Vector3[] _logicalVertices = new Vector3[8];
     private Dictionary<CellV2FaceDirection, FaceInfo> _faceInfos =
@@ -227,4 +268,7 @@ public class CellV2 : MonoBehaviour
     private MeshFilter _meshFilter;
     private Mesh _mesh;
     private MeshRenderer _meshRenderer;
+    //animation data
+    private float _heightAnimationTimeCurrent = 0f;
+    private float _heightAnimationTimeTarget = 0f;
 }
