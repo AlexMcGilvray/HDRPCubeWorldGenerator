@@ -155,7 +155,7 @@ public class CellV2 : MonoBehaviour
 
     public void MakeFace(CellV2FaceDirection direction, int indexBase, int quadBase)
     {
-        Debug.Log("quad base is " + quadBase + " and index base is " + indexBase);
+        //Debug.Log("quad base is " + quadBase + " and index base is " + indexBase);
         // add render vertices
         // add uv's
         // add normals
@@ -349,10 +349,19 @@ public class CellV2 : MonoBehaviour
         if (_heightAnimationTimeCurrent > 0f)
         {
             _heightAnimationTimeCurrent -= Time.deltaTime;
-            _heightAnimationTimeCurrent = Mathf.Clamp(_heightAnimationTimeCurrent, 0f, _heightAnimationTimeTarget);
-            float currentHeight = 1 - (_heightAnimationTimeCurrent / _heightAnimationTimeTarget) * _height;
+
+            _heightAnimationTimeCurrent = Mathf.Clamp(
+                _heightAnimationTimeCurrent, 
+                0f, 
+                _heightAnimationTimeTarget);
+
+            float currentHeight = 
+                (1 - (_heightAnimationTimeCurrent / _heightAnimationTimeTarget)) * _height;
+            //Debug.Log("currentHeight  is " + currentHeight);
+            //Debug.Log("height  is " + currentHeight);
+
             var topRenderVertices = GetAllTopRenderVertices();
-            Debug.Log("vertex count  is " + topRenderVertices.Count);
+            //Debug.Log("vertex count  is " + topRenderVertices.Count);
             foreach (var renderVertexIndex in GetAllTopRenderVertices())
             {
                 _renderVertices[renderVertexIndex].y = currentHeight;
@@ -371,10 +380,10 @@ public class CellV2 : MonoBehaviour
         new Dictionary<CellV2FaceDirection, FaceInfo>();
     private float _height;
     // render model data
-    public Vector3[] _renderVertices = new Vector3[20]; // 5 faces with 4 vertices each
-    public Vector3[] _renderNormals = new Vector3[20];
-    public Vector2[] _renderUVs = new Vector2[20];
-    public int[] _renderIndices = new int[30]; // 5 faces * (2 triangles * 3 indices)
+    private Vector3[] _renderVertices = new Vector3[20]; // 5 faces with 4 vertices each
+    private Vector3[] _renderNormals = new Vector3[20];
+    private Vector2[] _renderUVs = new Vector2[20];
+    private int[] _renderIndices = new int[30]; // 5 faces * (2 triangles * 3 indices)
     private MeshFilter _meshFilter;
     private Mesh _mesh;
     private MeshRenderer _meshRenderer;
