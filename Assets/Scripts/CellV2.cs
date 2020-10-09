@@ -200,6 +200,18 @@ public class CellV2 : MonoBehaviour
                     _renderIndices[indexBase + 3] = quadBase + 2;
                     _renderIndices[indexBase + 4] = quadBase + 3;
                     _renderIndices[indexBase + 5] = quadBase + 1;
+
+                    Vector3 vertexNormal = Vector3.Cross(
+                        _renderVertices[quadBase + 0] - _renderVertices[quadBase + 3],
+                        _renderVertices[quadBase + 1] - _renderVertices[quadBase + 3]);
+                    vertexNormal.Normalize();
+
+                    _renderNormals[quadBase + 0] = vertexNormal;
+                    _renderNormals[quadBase + 1] = vertexNormal;
+                    _renderNormals[quadBase + 2] = vertexNormal;
+                    _renderNormals[quadBase + 3] = vertexNormal;
+
+                    faceInfo.Normal = vertexNormal;
                 }
 
                 break;
@@ -232,6 +244,16 @@ public class CellV2 : MonoBehaviour
                     _renderIndices[indexBase + 3] = quadBase + 2;
                     _renderIndices[indexBase + 4] = quadBase + 3;
                     _renderIndices[indexBase + 5] = quadBase + 1;
+
+                    Vector3 vertexNormal = new Vector3(0f, 0f, 1f);
+
+
+                    _renderNormals[quadBase + 0] = vertexNormal;
+                    _renderNormals[quadBase + 1] = vertexNormal;
+                    _renderNormals[quadBase + 2] = vertexNormal;
+                    _renderNormals[quadBase + 3] = vertexNormal;
+
+                    faceInfo.Normal = vertexNormal;
                 }
                 break;
 
@@ -263,6 +285,16 @@ public class CellV2 : MonoBehaviour
                     _renderIndices[indexBase + 3] = quadBase + 2;
                     _renderIndices[indexBase + 4] = quadBase + 3;
                     _renderIndices[indexBase + 5] = quadBase + 1;
+
+                    Vector3 vertexNormal = new Vector3(0f, 0f, -1f);
+
+
+                    _renderNormals[quadBase + 0] = vertexNormal;
+                    _renderNormals[quadBase + 1] = vertexNormal;
+                    _renderNormals[quadBase + 2] = vertexNormal;
+                    _renderNormals[quadBase + 3] = vertexNormal;
+
+                    faceInfo.Normal = vertexNormal;
                 }
                 break;
 
@@ -294,6 +326,16 @@ public class CellV2 : MonoBehaviour
                     _renderIndices[indexBase + 3] = quadBase + 2;
                     _renderIndices[indexBase + 4] = quadBase + 3;
                     _renderIndices[indexBase + 5] = quadBase + 1;
+
+                    Vector3 vertexNormal = new Vector3(1f, 0f, 0f);
+
+
+                    _renderNormals[quadBase + 0] = vertexNormal;
+                    _renderNormals[quadBase + 1] = vertexNormal;
+                    _renderNormals[quadBase + 2] = vertexNormal;
+                    _renderNormals[quadBase + 3] = vertexNormal;
+
+                    faceInfo.Normal = vertexNormal;
                 }
                 break;
 
@@ -325,25 +367,20 @@ public class CellV2 : MonoBehaviour
                     _renderIndices[indexBase + 3] = quadBase + 2;
                     _renderIndices[indexBase + 4] = quadBase + 1;
                     _renderIndices[indexBase + 5] = quadBase + 3;
+
+                    Vector3 vertexNormal = new Vector3(-1f, 0f, 0f);
+
+                    _renderNormals[quadBase + 0] = vertexNormal;
+                    _renderNormals[quadBase + 1] = vertexNormal;
+                    _renderNormals[quadBase + 2] = vertexNormal;
+                    _renderNormals[quadBase + 3] = vertexNormal;
+
+                    faceInfo.Normal = vertexNormal;
                 }
                 break;
         }
 
-
-        Vector3 vertexNormal = Vector3.Cross(
-            _renderVertices[quadBase + 0] - _renderVertices[quadBase + 3],
-            _renderVertices[quadBase + 1] - _renderVertices[quadBase + 3]);
-        vertexNormal.Normalize();
-
-        _renderNormals[quadBase + 0] = vertexNormal;
-        _renderNormals[quadBase + 1] = vertexNormal;
-        _renderNormals[quadBase + 2] = vertexNormal;
-        _renderNormals[quadBase + 3] = vertexNormal;
-
-        faceInfo.Normal = vertexNormal;
-
         _faceInfos.Add(direction, faceInfo);
-
     }
 
     void Update()
@@ -353,11 +390,11 @@ public class CellV2 : MonoBehaviour
             _heightAnimationTimeCurrent -= Time.deltaTime;
 
             _heightAnimationTimeCurrent = Mathf.Clamp(
-                _heightAnimationTimeCurrent, 
-                0f, 
+                _heightAnimationTimeCurrent,
+                0f,
                 _heightAnimationTimeTarget);
 
-            float currentHeight = 
+            float currentHeight =
                 (1 - (_heightAnimationTimeCurrent / _heightAnimationTimeTarget)) * _height;
             //Debug.Log("currentHeight  is " + currentHeight);
             //Debug.Log("height  is " + currentHeight);
@@ -372,6 +409,12 @@ public class CellV2 : MonoBehaviour
             if (_mesh != null)
             {
                 _meshFilter.mesh.vertices = _renderVertices;
+            }
+        }
+        else
+        {
+            if (_mesh != null)
+            {
                 _meshFilter.mesh.RecalculateBounds();
             }
         }
@@ -384,12 +427,12 @@ public class CellV2 : MonoBehaviour
     private float _height;
     // render model data
     private Vector3[] _renderVertices = new Vector3[20]; // 5 faces with 4 vertices each
-    private Vector3[] _renderNormals = new Vector3[20];
+    public Vector3[] _renderNormals = new Vector3[20];
     private Vector2[] _renderUVs = new Vector2[20];
     private int[] _renderIndices = new int[30]; // 5 faces * (2 triangles * 3 indices)
     private MeshFilter _meshFilter;
     // we may not actuall want to store this because it appears the meshfilter copies it
-    private Mesh _mesh; 
+    private Mesh _mesh;
     private MeshRenderer _meshRenderer;
     //animation data
     private float _heightAnimationTimeCurrent = 0f;
