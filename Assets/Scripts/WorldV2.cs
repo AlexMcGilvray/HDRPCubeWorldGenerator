@@ -170,7 +170,7 @@ public class WorldV2 : MonoBehaviour
         {
             Debug.Log("making cell x " + x + " and z " + z);
         }
-        if (x < 0 || x > Dimensions || z < 0 || z > Dimensions)
+        if (x < 0 || x >= Dimensions || z < 0 || z >= Dimensions)
         {
             return CellCreationResult.HitWorldBoundary;
         }
