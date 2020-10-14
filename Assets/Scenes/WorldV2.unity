@@ -467,12 +467,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellTemplate: {fileID: 453784652}
-  Dimensions: 25
+  Dimensions: 111
   CellSize: 10
   AnimTimeTarget: 0.02
-  InitialHealth: 5
+  InitialHealth: 77
   InitialHeight: 10
-  VerboseDebuggingEnabled: 1
+  VerboseDebuggingEnabled: 0
   cellObjects: []
 --- !u!4 &705894307
 Transform:

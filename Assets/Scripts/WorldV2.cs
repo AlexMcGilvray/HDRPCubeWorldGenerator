@@ -25,14 +25,20 @@ public class WorldV2 : MonoBehaviour
 
         public int Life { get; set; }
 
-        public bool Alive => Life >= 0 ? true : false;
+        public bool Alive => Life > 0 ? true : false;
 
         public void Step()
         {
             if (Alive)
             {
-                _world.MakeCell(X, Y, _height);
                 Life--;
+
+                if (_world.MakeCell(X, Y, _height) == CellCreationResult.HitWorldBoundary)
+                {
+                    Life = 0;
+                    return;
+                }
+
                 switch (_direction)
                 {
                     case WorldBuilderDirection.North:
@@ -47,7 +53,9 @@ public class WorldV2 : MonoBehaviour
                     case WorldBuilderDirection.West:
                         X--;
                         break;
+
                 }
+
             }
         }
 
@@ -61,6 +69,11 @@ public class WorldV2 : MonoBehaviour
     public enum WorldBuilderDirection
     {
         North, South, East, West
+    }
+
+    public enum CellCreationResult
+    {
+        Success, HitWorldBoundary, OtherCellAlreadyExisted
     }
 
     public GameObject cellTemplate;
@@ -99,7 +112,7 @@ public class WorldV2 : MonoBehaviour
 
         var direction = _directionsToBuildLeft.Dequeue();
 
-        MakeWorldBuilder(x , z, height, health, direction);
+        MakeWorldBuilder(x, z, height, health, direction);
     }
 
     void StepWorldGeneration()
@@ -137,7 +150,7 @@ public class WorldV2 : MonoBehaviour
             int x = Dimensions / 2;
             int z = Dimensions / 2;
             _builders.Clear();
-            MakeWorldBuilder(x , z, height, health, dir);
+            MakeWorldBuilder(x, z, height, health, dir);
         }
 
         if (_animTimeCurrent >= AnimTimeTarget && AreAnyBuildersAlive())
@@ -151,21 +164,19 @@ public class WorldV2 : MonoBehaviour
         }
     }
 
-    void MakeCell(int x, int z, float height)
+    CellCreationResult MakeCell(int x, int z, float height)
     {
-        if (x < 0 || x > Dimensions || z < 0 || z > Dimensions)
-        {
-            Debug.LogError(
-                "make cell parameter out of range. value of x is  " + x + " and z is " + z);
-            return;
-        }
         if (VerboseDebuggingEnabled)
         {
             Debug.Log("making cell x " + x + " and z " + z);
         }
+        if (x < 0 || x > Dimensions || z < 0 || z > Dimensions)
+        {
+            return CellCreationResult.HitWorldBoundary;
+        }
         if (cellObjects[z * Dimensions + x] != null)
         {
-            return;
+            return CellCreationResult.OtherCellAlreadyExisted;
         }
         float xCoord = x * CellSize - (Dimensions / 2) * CellSize;
         float zCoord = z * CellSize - (Dimensions / 2) * CellSize;
@@ -174,6 +185,7 @@ public class WorldV2 : MonoBehaviour
         cellObjects[z * Dimensions + x] = cellObject;
         var cell = cellObject.GetComponent<CellV2>();
         cell.MakeCell(height, CellSize / 2, AnimTimeTarget);
+        return CellCreationResult.Success;
     }
 
     private float _animTimeCurrent;
