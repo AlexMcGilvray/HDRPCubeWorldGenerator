@@ -7,7 +7,6 @@ public class WorldV2 : MonoBehaviour
 {
     public class MountainBuilder
     {
-
         public MountainBuilder(
             WorldV2 world,
             WorldBuilderDirection direction,
@@ -71,6 +70,8 @@ public class WorldV2 : MonoBehaviour
     public int InitialHealth = 5;
     public float InitialHeight = 10;
 
+    public bool VerboseDebuggingEnabled = true;
+
     public List<GameObject> cellObjects;
     bool AreAnyBuildersAlive() => _builders.Any(x => x.Alive);
 
@@ -98,7 +99,7 @@ public class WorldV2 : MonoBehaviour
 
         var direction = _directionsToBuildLeft.Dequeue();
 
-        MakeWorldBuilder(x - 1, z, height, health, direction);
+        MakeWorldBuilder(x , z, height, health, direction);
     }
 
     void StepWorldGeneration()
@@ -112,7 +113,6 @@ public class WorldV2 : MonoBehaviour
         }
     }
 
-
     public void MakeWorldBuilder(
         int x,
         int z,
@@ -122,7 +122,7 @@ public class WorldV2 : MonoBehaviour
     {
         if (x >= 0 && x < Dimensions && z >= 0 && z < Dimensions)
         {
-            var worldBuilder = new MountainBuilder(this, direction, x, z, health, height);
+            var worldBuilder = new MountainBuilder(this, direction, health, x, z, height);
             _builders.Add(worldBuilder);
         }
     }
@@ -136,26 +136,9 @@ public class WorldV2 : MonoBehaviour
             var dir = _directionsToBuildLeft.Dequeue();
             int x = Dimensions / 2;
             int z = Dimensions / 2;
-
             _builders.Clear();
-
-            switch (dir)
-            {
-                case WorldBuilderDirection.East:
-                    MakeWorldBuilder(x + 1, z, height, health, WorldBuilderDirection.East);
-                    break;
-
-                case WorldBuilderDirection.South:
-                    MakeWorldBuilder(x, z - 1, height, health, WorldBuilderDirection.South);
-                    break;
-
-                case WorldBuilderDirection.North:
-                    MakeWorldBuilder(x, z + 1, height, health, WorldBuilderDirection.North);
-                    break;
-            }
-
+            MakeWorldBuilder(x , z, height, health, dir);
         }
-
 
         if (_animTimeCurrent >= AnimTimeTarget && AreAnyBuildersAlive())
         {
@@ -170,6 +153,16 @@ public class WorldV2 : MonoBehaviour
 
     void MakeCell(int x, int z, float height)
     {
+        if (x < 0 || x > Dimensions || z < 0 || z > Dimensions)
+        {
+            Debug.LogError(
+                "make cell parameter out of range. value of x is  " + x + " and z is " + z);
+            return;
+        }
+        if (VerboseDebuggingEnabled)
+        {
+            Debug.Log("making cell x " + x + " and z " + z);
+        }
         if (cellObjects[z * Dimensions + x] != null)
         {
             return;
