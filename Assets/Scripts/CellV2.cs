@@ -23,7 +23,6 @@ public class CellV2 : MonoBehaviour
 {
     public Material worldMaterial;
 
-
     void Start()
     {
         _meshRenderer = gameObject.GetComponent<MeshRenderer>();
@@ -247,7 +246,6 @@ public class CellV2 : MonoBehaviour
 
                     Vector3 vertexNormal = new Vector3(0f, 0f, 1f);
 
-
                     _renderNormals[quadBase + 0] = vertexNormal;
                     _renderNormals[quadBase + 1] = vertexNormal;
                     _renderNormals[quadBase + 2] = vertexNormal;
@@ -288,7 +286,6 @@ public class CellV2 : MonoBehaviour
 
                     Vector3 vertexNormal = new Vector3(0f, 0f, -1f);
 
-
                     _renderNormals[quadBase + 0] = vertexNormal;
                     _renderNormals[quadBase + 1] = vertexNormal;
                     _renderNormals[quadBase + 2] = vertexNormal;
@@ -328,7 +325,6 @@ public class CellV2 : MonoBehaviour
                     _renderIndices[indexBase + 5] = quadBase + 1;
 
                     Vector3 vertexNormal = new Vector3(1f, 0f, 0f);
-
 
                     _renderNormals[quadBase + 0] = vertexNormal;
                     _renderNormals[quadBase + 1] = vertexNormal;

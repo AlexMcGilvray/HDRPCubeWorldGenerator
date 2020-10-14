@@ -3,136 +3,136 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public enum WorldBuilderDirection
+public class World : MonoBehaviour
 {
-    North, South, East, West
-}
-
-public class WorldBuilder
-{
-    public WorldBuilder(
-        World world,
-        int x,
-        int y,
-        float height,
-        int health,
-        WorldBuilderDirection direction = WorldBuilderDirection.North)
+    public enum WorldBuilderDirection
     {
-        _world = world;
-        Direction = direction;
-        X = x;
-        Z = y;
-        Height = height;
-        Health = health;
-    }
-    public WorldBuilderDirection Direction { get; set; }
-    public int X { get; set; }
-    public int Z { get; set; }
-    public int Health { get; set; }
-
-    public float ChanceOfSpawningNewBuilder{get;set;} = 0.03f;
-    public float Height { get; set; }
-
-    public float HeightDegredationMin{get;set;} = 1;
-
-    public float HeightDegredationMax{get;set;} = 10;
-
-    public bool Alive => Health > 0;
-
-    public bool IsInWorldBounds => 
-        X >= 0 && X < _world.Dimensions && Z >= 0 && Z < _world.Dimensions;
-
-    public void UpdateMovement()
-    {
-        Health--;
-
-        switch (Direction)
-        {
-            case WorldBuilderDirection.West:
-                X--;
-                break;
-            case WorldBuilderDirection.East:
-                X++;
-                break;
-            case WorldBuilderDirection.South:
-                Z--;
-                break;
-            case WorldBuilderDirection.North:
-                Z++;
-                break;
-            default:
-                break;
-        }
-
-        if (!IsInWorldBounds) // for now we'll just kill the builder if it's out of bounds.
-        {
-            Health = 0; 
-            return;
-        }
-
-        Height -= Random.Range(HeightDegredationMin,HeightDegredationMax);
-
-        UpdateNewBuilderSpawning();
+        North, South, East, West
     }
 
-    private static List<WorldBuilderDirection> GetPerpendicularDirections(
-        WorldBuilderDirection direction)
+    public class WorldBuilder
     {
-        List<WorldBuilderDirection> results = new List<WorldBuilderDirection>(2);
-
-        switch (direction)
+        public WorldBuilder(
+            World world,
+            int x,
+            int y,
+            float height,
+            int health,
+            WorldBuilderDirection direction = WorldBuilderDirection.North)
         {
-            case WorldBuilderDirection.West:
-            case WorldBuilderDirection.East:
-                results.Add(WorldBuilderDirection.North);
-                results.Add(WorldBuilderDirection.South);
-                break;
-            case WorldBuilderDirection.South:
-            case WorldBuilderDirection.North:
-                results.Add(WorldBuilderDirection.East);
-                results.Add(WorldBuilderDirection.West);
-                break;
-            default:
-                break;
+            _world = world;
+            Direction = direction;
+            X = x;
+            Z = y;
+            Height = height;
+            Health = health;
         }
+        public WorldBuilderDirection Direction { get; set; }
+        public int X { get; set; }
+        public int Z { get; set; }
+        public int Health { get; set; }
 
-        return results;
-    }
+        public float ChanceOfSpawningNewBuilder { get; set; } = 0.03f;
+        public float Height { get; set; }
 
-    private void UpdateNewBuilderSpawning()
-    {
-        var directions = GetPerpendicularDirections(Direction);
-        foreach (var dir in directions)
+        public float HeightDegredationMin { get; set; } = 1;
+
+        public float HeightDegredationMax { get; set; } = 10;
+
+        public bool Alive => Health > 0;
+
+        public bool IsInWorldBounds =>
+            X >= 0 && X < _world.Dimensions && Z >= 0 && Z < _world.Dimensions;
+
+        public void UpdateMovement()
         {
-            if (Random.value < ChanceOfSpawningNewBuilder)
+            Health--;
+
+            switch (Direction)
             {
-                float newHeight = Height - Random.Range(HeightDegredationMin, HeightDegredationMax);
-                switch (dir)
-                {
-                    case WorldBuilderDirection.West:
-                        _world.MakeWorldBuilder(X - 1, Z, newHeight, Health - 1, dir);
-                        break;
-                    case WorldBuilderDirection.East:
-                        _world.MakeWorldBuilder(X + 1, Z, newHeight, Health - 1, dir);
+                case WorldBuilderDirection.West:
+                    X--;
+                    break;
+                case WorldBuilderDirection.East:
+                    X++;
+                    break;
+                case WorldBuilderDirection.South:
+                    Z--;
+                    break;
+                case WorldBuilderDirection.North:
+                    Z++;
+                    break;
+                default:
+                    break;
+            }
 
-                        break;
-                    case WorldBuilderDirection.South:
-                        _world.MakeWorldBuilder(X, Z - 1, newHeight, Health - 1, dir);
-                        break;
-                    case WorldBuilderDirection.North:
-                        _world.MakeWorldBuilder(X, Z + 1, newHeight, Health - 1, dir);
-                        break;
-                    default:
-                        break;
+            if (!IsInWorldBounds) // for now we'll just kill the builder if it's out of bounds.
+            {
+                Health = 0;
+                return;
+            }
+
+            Height -= Random.Range(HeightDegredationMin, HeightDegredationMax);
+
+            UpdateNewBuilderSpawning();
+        }
+
+        private static List<WorldBuilderDirection> GetPerpendicularDirections(
+            WorldBuilderDirection direction)
+        {
+            List<WorldBuilderDirection> results = new List<WorldBuilderDirection>(2);
+
+            switch (direction)
+            {
+                case WorldBuilderDirection.West:
+                case WorldBuilderDirection.East:
+                    results.Add(WorldBuilderDirection.North);
+                    results.Add(WorldBuilderDirection.South);
+                    break;
+                case WorldBuilderDirection.South:
+                case WorldBuilderDirection.North:
+                    results.Add(WorldBuilderDirection.East);
+                    results.Add(WorldBuilderDirection.West);
+                    break;
+                default:
+                    break;
+            }
+
+            return results;
+        }
+
+        private void UpdateNewBuilderSpawning()
+        {
+            var directions = GetPerpendicularDirections(Direction);
+            foreach (var dir in directions)
+            {
+                if (Random.value < ChanceOfSpawningNewBuilder)
+                {
+                    float newHeight = Height - Random.Range(HeightDegredationMin, HeightDegredationMax);
+                    switch (dir)
+                    {
+                        case WorldBuilderDirection.West:
+                            _world.MakeWorldBuilder(X - 1, Z, newHeight, Health - 1, dir);
+                            break;
+                        case WorldBuilderDirection.East:
+                            _world.MakeWorldBuilder(X + 1, Z, newHeight, Health - 1, dir);
+
+                            break;
+                        case WorldBuilderDirection.South:
+                            _world.MakeWorldBuilder(X, Z - 1, newHeight, Health - 1, dir);
+                            break;
+                        case WorldBuilderDirection.North:
+                            _world.MakeWorldBuilder(X, Z + 1, newHeight, Health - 1, dir);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
+        private World _world;
     }
-    private World _world;
-}
 
-public class World : MonoBehaviour
-{
     public GameObject cellTemplate;
     public int Dimensions = 20;
     public float CellSize = 10;
@@ -214,7 +214,7 @@ public class World : MonoBehaviour
     {
         // we are going to add to the list while modifying so we need to make a temp copy
         List<WorldBuilder> tempBuilders = new List<WorldBuilder>(_builders);
-        foreach (var builder in tempBuilders )
+        foreach (var builder in tempBuilders)
         {
             if (!builder.Alive)
             {
