@@ -470,7 +470,7 @@ MonoBehaviour:
   Dimensions: 111
   CellSize: 10
   AnimTimeTarget: 0.02
-  InitialHealth: 77
+  InitialHealth: 23
   InitialHeight: 10
   VerboseDebuggingEnabled: 0
   cellObjects: []

@@ -5,6 +5,64 @@ using UnityEngine;
 
 public class WorldV2 : MonoBehaviour
 {
+    // Creates a straight line with no branch logic for the mountain builder
+    public class MountainBuilderLineHelper
+    {
+        public MountainBuilderLineHelper(
+      WorldV2 world,
+      WorldBuilderDirection direction,
+      int life,
+      int x,
+      int y,
+      float height)
+        {
+            _world = world;
+            _direction = direction;
+            Life = life;
+            X = x;
+            Y = y;
+            _height = height;
+        }
+        public int Life { get; set; }
+
+        public bool Alive => Life > 0 ? true : false;
+        public void Step()
+        {
+            if (Alive)
+            {
+                Life--;
+
+                if (_world.MakeCell(X, Y, _height) == CellCreationResult.HitWorldBoundary)
+                {
+                    Life = 0;
+                    return;
+                }
+
+                switch (_direction)
+                {
+                    case WorldBuilderDirection.North:
+                        Y++;
+                        break;
+                    case WorldBuilderDirection.South:
+                        Y--;
+                        break;
+                    case WorldBuilderDirection.East:
+                        X++;
+                        break;
+                    case WorldBuilderDirection.West:
+                        X--;
+                        break;
+
+                }
+            }
+        }
+
+        private WorldV2 _world;
+        private WorldBuilderDirection _direction;
+
+        private int X, Y;
+        private float _height;
+    }
     public class MountainBuilder
     {
         public MountainBuilder(
@@ -36,34 +94,64 @@ public class WorldV2 : MonoBehaviour
                 if (_world.MakeCell(X, Y, _height) == CellCreationResult.HitWorldBoundary)
                 {
                     Life = 0;
-                    return;
                 }
-
-                switch (_direction)
+                else
                 {
-                    case WorldBuilderDirection.North:
-                        Y++;
-                        break;
-                    case WorldBuilderDirection.South:
-                        Y--;
-                        break;
-                    case WorldBuilderDirection.East:
-                        X++;
-                        break;
-                    case WorldBuilderDirection.West:
-                        X--;
-                        break;
+                    switch (_direction)
+                    {
+                        case WorldBuilderDirection.North:
+                            MakeLineHelper(WorldBuilderDirection.East);
+                            MakeLineHelper(WorldBuilderDirection.West);
+                            Y++;
+                            break;
+                        case WorldBuilderDirection.South:
+                            MakeLineHelper(WorldBuilderDirection.East);
+                            MakeLineHelper(WorldBuilderDirection.West);
+                            Y--;
+                            break;
+                        case WorldBuilderDirection.East:
+                            MakeLineHelper(WorldBuilderDirection.North);
+                            MakeLineHelper(WorldBuilderDirection.South);
+                            X++;
+                            break;
+                        case WorldBuilderDirection.West:
+                            MakeLineHelper(WorldBuilderDirection.North);
+                            MakeLineHelper(WorldBuilderDirection.South);
+                            X--;
+                            break;
 
+                    }
                 }
-
             }
+            foreach(var helper in _lineHelpers)
+            {
+                if (helper.Alive)
+                {
+                    helper.Step();
+                }
+            }
+        }
+
+        private void MakeLineHelper(WorldBuilderDirection direction)
+        {
+            MountainBuilderLineHelper helper = new MountainBuilderLineHelper(
+                _world,
+                direction,
+                Life,
+                X,
+                Y,
+                _height
+            );
+            _lineHelpers.Add(helper);
         }
 
         private WorldV2 _world;
         private WorldBuilderDirection _direction;
-
         private int X, Y;
         private float _height;
+
+        private List<MountainBuilderLineHelper> _lineHelpers =
+            new List<MountainBuilderLineHelper>();
     }
 
     public enum WorldBuilderDirection
