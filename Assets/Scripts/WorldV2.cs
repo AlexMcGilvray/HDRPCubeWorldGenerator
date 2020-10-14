@@ -1,26 +1,63 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class WorldV2 : MonoBehaviour
 {
     public class MountainBuilder
     {
-        public MountainBuilder(WorldV2 world, WorldBuilderDirection direction)
+
+        public MountainBuilder(
+            WorldV2 world,
+            WorldBuilderDirection direction,
+            int life,
+            int x,
+            int y,
+            float height)
         {
             _world = world;
             _direction = direction;
+            Life = life;
+            X = x;
+            Y = y;
+            _height = height;
         }
+
+        public int Life { get; set; }
+
+        public bool Alive => Life >= 0 ? true : false;
 
         public void Step()
         {
-
+            if (Alive)
+            {
+                _world.MakeCell(X, Y, _height);
+                Life--;
+                switch (_direction)
+                {
+                    case WorldBuilderDirection.North:
+                        Y++;
+                        break;
+                    case WorldBuilderDirection.South:
+                        Y--;
+                        break;
+                    case WorldBuilderDirection.East:
+                        X++;
+                        break;
+                    case WorldBuilderDirection.West:
+                        X--;
+                        break;
+                }
+            }
         }
 
         private WorldV2 _world;
         private WorldBuilderDirection _direction;
-    }
 
+        private int X, Y;
+        private float _height;
+    }
 
     public enum WorldBuilderDirection
     {
@@ -31,17 +68,104 @@ public class WorldV2 : MonoBehaviour
     public int Dimensions = 20;
     public float CellSize = 10;
     public float AnimTimeTarget = 0.5f;
+    public int InitialHealth = 5;
+    public float InitialHeight = 10;
 
     public List<GameObject> cellObjects;
+    bool AreAnyBuildersAlive() => _builders.Any(x => x.Alive);
 
     void Start()
     {
+        cellObjects = new List<GameObject>(Dimensions * Dimensions);
+        for (int i = 0; i < Dimensions * Dimensions; ++i)
+        {
+            cellObjects.Add(null);
+        }
+        InitWorldGeneration(Dimensions / 2, Dimensions / 2);
+    }
+    void InitWorldGeneration(int x, int z)
+    {
+        float height = InitialHeight;
+        int health = InitialHealth;
 
+        MakeCell(x, z, height);
+        _animTimeCurrent = 0;
+
+        _directionsToBuildLeft.Enqueue(WorldBuilderDirection.West);
+        _directionsToBuildLeft.Enqueue(WorldBuilderDirection.East);
+        _directionsToBuildLeft.Enqueue(WorldBuilderDirection.North);
+        _directionsToBuildLeft.Enqueue(WorldBuilderDirection.South);
+
+        var direction = _directionsToBuildLeft.Dequeue();
+
+        MakeWorldBuilder(x - 1, z, height, health, direction);
+    }
+
+    void StepWorldGeneration()
+    {
+        foreach (var builder in _builders)
+        {
+            if (builder.Alive)
+            {
+                builder.Step();
+            }
+        }
+    }
+
+
+    public void MakeWorldBuilder(
+        int x,
+        int z,
+        float height,
+        int health,
+        WorldBuilderDirection direction = WorldBuilderDirection.North)
+    {
+        if (x >= 0 && x < Dimensions && z >= 0 && z < Dimensions)
+        {
+            var worldBuilder = new MountainBuilder(this, direction, x, z, health, height);
+            _builders.Add(worldBuilder);
+        }
     }
 
     void Update()
     {
+        if (!AreAnyBuildersAlive() && _directionsToBuildLeft.Count > 0)
+        {
+            float height = InitialHeight;
+            int health = InitialHealth;
+            var dir = _directionsToBuildLeft.Dequeue();
+            int x = Dimensions / 2;
+            int z = Dimensions / 2;
 
+            _builders.Clear();
+
+            switch (dir)
+            {
+                case WorldBuilderDirection.East:
+                    MakeWorldBuilder(x + 1, z, height, health, WorldBuilderDirection.East);
+                    break;
+
+                case WorldBuilderDirection.South:
+                    MakeWorldBuilder(x, z - 1, height, health, WorldBuilderDirection.South);
+                    break;
+
+                case WorldBuilderDirection.North:
+                    MakeWorldBuilder(x, z + 1, height, health, WorldBuilderDirection.North);
+                    break;
+            }
+
+        }
+
+
+        if (_animTimeCurrent >= AnimTimeTarget && AreAnyBuildersAlive())
+        {
+            StepWorldGeneration();
+            _animTimeCurrent = 0;
+        }
+        else
+        {
+            _animTimeCurrent += Time.deltaTime;
+        }
     }
 
     void MakeCell(int x, int z, float height)
@@ -58,4 +182,10 @@ public class WorldV2 : MonoBehaviour
         var cell = cellObject.GetComponent<CellV2>();
         cell.MakeCell(height, CellSize / 2, AnimTimeTarget);
     }
+
+    private float _animTimeCurrent;
+
+    private Queue<WorldBuilderDirection> _directionsToBuildLeft = new Queue<WorldBuilderDirection>();
+
+    private HashSet<MountainBuilder> _builders = new HashSet<MountainBuilder>();
 }
