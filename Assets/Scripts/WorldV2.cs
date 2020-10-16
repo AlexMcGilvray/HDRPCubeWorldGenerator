@@ -68,12 +68,6 @@ public class WorldV2 : MonoBehaviour
         private int X, Y;
         private float _height;
     }
-
-    // 1 : Spawn a mountain builder line and then let it animate out its line
-    //      while periodically queuing operations to spawn child lines along the lines
-    //      path. Once the line completes it triggers its children to run and so on.
-    //      Any cell that doesn't have a line 
-    // 2 : Once all ancestor lines have triggered 
     public class MountainBuilder
     {
         public MountainBuilder(
@@ -101,37 +95,51 @@ public class WorldV2 : MonoBehaviour
             if (Alive)
             {
                 Life--;
+                                    switch (_direction)
+                        {
+                            case WorldBuilderDirection.North:
+                                Y++;
+                                break;
+                            case WorldBuilderDirection.South:
+                                Y--;
+                                break;
+                            case WorldBuilderDirection.East:
+                                X++;
+                                break;
+                            case WorldBuilderDirection.West:
+                                X--;
+                                break;
+                        }
 
                 var creationResult = _world.MakeCell(X, Y, _height);
+
                 switch (creationResult.Status)
                 {
                     case CellCreationResultStatus.HitWorldBoundary:
                         Life = 0;
                         break;
                     case CellCreationResultStatus.OtherCellAlreadyExisted:
+          
                         break;
                     case CellCreationResultStatus.Success:
+                        creationResult.Cell.SetState(CellV2State.Animating);
                         switch (_direction)
                         {
                             case WorldBuilderDirection.North:
                                 MakeLineHelper(WorldBuilderDirection.East);
                                 MakeLineHelper(WorldBuilderDirection.West);
-                                Y++;
                                 break;
                             case WorldBuilderDirection.South:
                                 MakeLineHelper(WorldBuilderDirection.East);
                                 MakeLineHelper(WorldBuilderDirection.West);
-                                Y--;
                                 break;
                             case WorldBuilderDirection.East:
                                 MakeLineHelper(WorldBuilderDirection.North);
                                 MakeLineHelper(WorldBuilderDirection.South);
-                                X++;
                                 break;
                             case WorldBuilderDirection.West:
                                 MakeLineHelper(WorldBuilderDirection.North);
                                 MakeLineHelper(WorldBuilderDirection.South);
-                                X--;
                                 break;
 
                         }
@@ -215,14 +223,11 @@ public class WorldV2 : MonoBehaviour
         MakeCell(x, z, height);
         _animTimeCurrent = 0;
 
-        _directionsToBuildLeft.Enqueue(WorldBuilderDirection.West);
-        _directionsToBuildLeft.Enqueue(WorldBuilderDirection.East);
         _directionsToBuildLeft.Enqueue(WorldBuilderDirection.North);
         _directionsToBuildLeft.Enqueue(WorldBuilderDirection.South);
+        _directionsToBuildLeft.Enqueue(WorldBuilderDirection.East);
+        _directionsToBuildLeft.Enqueue(WorldBuilderDirection.West);
 
-        var direction = _directionsToBuildLeft.Dequeue();
-
-        MakeWorldBuilder(x, z, height, health, direction);
     }
 
     void StepWorldGeneration()
@@ -247,6 +252,7 @@ public class WorldV2 : MonoBehaviour
         {
             var worldBuilder = new MountainBuilder(this, direction, health, x, z, height);
             _builders.Add(worldBuilder);
+            //Debug.Log("made world builder facing " + direction.ToString());
         }
     }
 
@@ -261,6 +267,7 @@ public class WorldV2 : MonoBehaviour
             int z = Dimensions / 2;
             _builders.Clear();
             MakeWorldBuilder(x, z, height, health, dir);
+            _animTimeCurrent = 0;
         }
 
         if (_animTimeCurrent >= AnimTimeTarget && AreAnyBuildersAlive())
