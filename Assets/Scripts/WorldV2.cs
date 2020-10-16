@@ -6,71 +6,10 @@ using UnityEngine;
 public class WorldV2 : MonoBehaviour
 {
     // Creates a straight line with no branch logic for the mountain builder
+    public enum MountainBuilderLineHelperState { Dormant, Active }
     public class MountainBuilderLineHelper
     {
         public MountainBuilderLineHelper(
-      WorldV2 world,
-      WorldBuilderDirection direction,
-      int life,
-      int x,
-      int y,
-      float height)
-        {
-            _world = world;
-            _direction = direction;
-            Life = life;
-            X = x;
-            Y = y;
-            _height = height;
-        }
-        public int Life { get; set; }
-
-        public bool Alive => Life > 0 ? true : false;
-        public void Step()
-        {
-            if (Alive)
-            {
-                Life--;
-                var creationResult = _world.MakeCell(X, Y, _height);
-
-                switch (creationResult.Status)
-                {
-                    case CellCreationResultStatus.HitWorldBoundary:
-                        Life = 0;
-                        break;
-                    case CellCreationResultStatus.OtherCellAlreadyExisted:
-                        break;
-                    case CellCreationResultStatus.Success:
-                        switch (_direction)
-                        {
-                            case WorldBuilderDirection.North:
-                                Y++;
-                                break;
-                            case WorldBuilderDirection.South:
-                                Y--;
-                                break;
-                            case WorldBuilderDirection.East:
-                                X++;
-                                break;
-                            case WorldBuilderDirection.West:
-                                X--;
-                                break;
-
-                        }
-                        break;
-                }
-            }
-        }
-
-        private WorldV2 _world;
-        private WorldBuilderDirection _direction;
-
-        private int X, Y;
-        private float _height;
-    }
-    public class MountainBuilder
-    {
-        public MountainBuilder(
             WorldV2 world,
             WorldBuilderDirection direction,
             int life,
@@ -85,11 +24,9 @@ public class WorldV2 : MonoBehaviour
             Y = y;
             _height = height;
         }
-
         public int Life { get; set; }
 
         public bool Alive => Life > 0 ? true : false;
-
         public void Step()
         {
             if (Alive)
@@ -110,7 +47,6 @@ public class WorldV2 : MonoBehaviour
                         X--;
                         break;
                 }
-
                 var creationResult = _world.MakeCell(X, Y, _height);
 
                 switch (creationResult.Status)
@@ -119,41 +55,129 @@ public class WorldV2 : MonoBehaviour
                         Life = 0;
                         break;
                     case CellCreationResultStatus.OtherCellAlreadyExisted:
-
                         break;
                     case CellCreationResultStatus.Success:
                         creationResult.Cell.SetState(CellV2State.Animating);
-                        switch (_direction)
-                        {
-                            case WorldBuilderDirection.North:
-                                MakeLineHelper(WorldBuilderDirection.East);
-                                MakeLineHelper(WorldBuilderDirection.West);
-                                break;
-                            case WorldBuilderDirection.South:
-                                MakeLineHelper(WorldBuilderDirection.East);
-                                MakeLineHelper(WorldBuilderDirection.West);
-                                break;
-                            case WorldBuilderDirection.East:
-                                MakeLineHelper(WorldBuilderDirection.North);
-                                MakeLineHelper(WorldBuilderDirection.South);
-                                break;
-                            case WorldBuilderDirection.West:
-                                MakeLineHelper(WorldBuilderDirection.North);
-                                MakeLineHelper(WorldBuilderDirection.South);
-                                break;
-
-                        }
                         break;
                 }
             }
+        }
 
-            foreach (var helper in _lineHelpers)
+        private WorldV2 _world;
+        private WorldBuilderDirection _direction;
+
+        private int X, Y;
+        private float _height;
+
+        private Queue<Vector2Int> _deferredCellsToCreate = new Queue<Vector2Int>();
+    }
+
+    public enum MountainBuilderState { BuildingLines, BuildingLineHelpers, Done }
+
+    public class MountainBuilder
+    {
+        public MountainBuilder(
+            WorldV2 world,
+            WorldBuilderDirection direction,
+            int life,
+            int x,
+            int y,
+            float height)
+        {
+            _world = world;
+            _direction = direction;
+            Life = life;
+            X = x;
+            Y = y;
+            _height = height;
+        }
+
+        public MountainBuilderState State { get; set; } = MountainBuilderState.BuildingLines;
+        public int Life { get; set; }
+
+        public bool Alive => Life > 0 ? true : false;
+
+        public void Step()
+        {
+
+            switch (State)
             {
-                if (helper.Alive)
-                {
-                    helper.Step();
-                }
+                case MountainBuilderState.BuildingLines:
+                    Life--;
+                    switch (_direction)
+                    {
+                        case WorldBuilderDirection.North:
+                            Y++;
+                            break;
+                        case WorldBuilderDirection.South:
+                            Y--;
+                            break;
+                        case WorldBuilderDirection.East:
+                            X++;
+                            break;
+                        case WorldBuilderDirection.West:
+                            X--;
+                            break;
+                    }
+
+                    var creationResult = _world.MakeCell(X, Y, _height);
+
+                    switch (creationResult.Status)
+                    {
+                        case CellCreationResultStatus.HitWorldBoundary:
+                            Life = 0;
+                            break;
+                        case CellCreationResultStatus.OtherCellAlreadyExisted:
+                            break;
+                        case CellCreationResultStatus.Success:
+                            creationResult.Cell.SetState(CellV2State.Animating);
+                            switch (_direction)
+                            {
+                                case WorldBuilderDirection.North:
+                                    MakeLineHelper(WorldBuilderDirection.East);
+                                    MakeLineHelper(WorldBuilderDirection.West);
+                                    break;
+                                case WorldBuilderDirection.South:
+                                    MakeLineHelper(WorldBuilderDirection.East);
+                                    MakeLineHelper(WorldBuilderDirection.West);
+                                    break;
+                                case WorldBuilderDirection.East:
+                                    MakeLineHelper(WorldBuilderDirection.North);
+                                    MakeLineHelper(WorldBuilderDirection.South);
+                                    break;
+                                case WorldBuilderDirection.West:
+                                    MakeLineHelper(WorldBuilderDirection.North);
+                                    MakeLineHelper(WorldBuilderDirection.South);
+                                    break;
+                            }
+                            break;
+                    }
+
+                    if (Life <= 0)
+                    {
+                        State = MountainBuilderState.BuildingLineHelpers;
+                    }
+                    break;
+                case MountainBuilderState.BuildingLineHelpers:
+
+                    foreach (var helper in _lineHelpers)
+                    {
+                        if (helper.Alive)
+                        {
+                            helper.Step();
+                        }
+                    }
+                    bool areAllHelpersDone = _lineHelpers.All(x => !x.Alive);
+                    if (areAllHelpersDone)
+                    {
+                        State = MountainBuilderState.Done;
+                    }
+                    
+                    break;
+                case MountainBuilderState.Done:
+                    break;
             }
+
         }
 
         private void MakeLineHelper(WorldBuilderDirection direction)
@@ -161,7 +185,7 @@ public class WorldV2 : MonoBehaviour
             MountainBuilderLineHelper helper = new MountainBuilderLineHelper(
                 _world,
                 direction,
-                Life / 4,
+                Life / 2,
                 X,
                 Y,
                 _height
@@ -178,10 +202,7 @@ public class WorldV2 : MonoBehaviour
             new List<MountainBuilderLineHelper>();
     }
 
-    public enum WorldBuilderDirection
-    {
-        North, South, East, West
-    }
+    public enum WorldBuilderDirection { North, South, East, West }
 
     public class CellCreationResult
     {
@@ -204,7 +225,6 @@ public class WorldV2 : MonoBehaviour
     public bool VerboseDebuggingEnabled = true;
 
     public List<GameObject> cellObjects;
-    bool AreAnyBuildersAlive() => _builders.Any(x => x.Alive);
 
     void Start()
     {
@@ -232,12 +252,9 @@ public class WorldV2 : MonoBehaviour
 
     void StepWorldGeneration()
     {
-        foreach (var builder in _builders)
+        if (_currentBuilder != null)
         {
-            if (builder.Alive)
-            {
-                builder.Step();
-            }
+            _currentBuilder.Step();
         }
     }
 
@@ -250,27 +267,26 @@ public class WorldV2 : MonoBehaviour
     {
         if (x >= 0 && x < Dimensions && z >= 0 && z < Dimensions)
         {
-            var worldBuilder = new MountainBuilder(this, direction, health, x, z, height);
-            _builders.Add(worldBuilder);
+            _currentBuilder = new MountainBuilder(this, direction, health, x, z, height);
             //Debug.Log("made world builder facing " + direction.ToString());
         }
     }
 
     void Update()
     {
-        if (!AreAnyBuildersAlive() && _directionsToBuildLeft.Count > 0)
+        bool currentBuilderInvalid = _currentBuilder == null || _currentBuilder.State == MountainBuilderState.Done;
+        if (currentBuilderInvalid && _directionsToBuildLeft.Count > 0)
         {
             float height = InitialHeight;
             int health = InitialHealth;
             var dir = _directionsToBuildLeft.Dequeue();
             int x = Dimensions / 2;
             int z = Dimensions / 2;
-            _builders.Clear();
             MakeWorldBuilder(x, z, height, health, dir);
             _animTimeCurrent = 0;
         }
 
-        if (_animTimeCurrent >= AnimTimeTarget && AreAnyBuildersAlive())
+        if (_animTimeCurrent >= AnimTimeTarget)
         {
             StepWorldGeneration();
             _animTimeCurrent = 0;
@@ -313,6 +329,5 @@ public class WorldV2 : MonoBehaviour
     private float _animTimeCurrent;
 
     private Queue<WorldBuilderDirection> _directionsToBuildLeft = new Queue<WorldBuilderDirection>();
-
-    private HashSet<MountainBuilder> _builders = new HashSet<MountainBuilder>();
+    private MountainBuilder _currentBuilder;
 }
