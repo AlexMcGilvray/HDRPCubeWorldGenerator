@@ -25,14 +25,18 @@ public class WorldV2 : MonoBehaviour
             _height = height;
         }
         public int Life { get; set; }
-
         public bool Alive => Life > 0 ? true : false;
         public void Step()
         {
             if (Alive)
             {
                 Life--;
-                _height -= Random.Range(_world.HeightDegredationMin,_world.HeightDegredationMax);
+                _height -= Random.Range(_world.HeightDegredationMin, _world.HeightDegredationMax);
+                if (_height <= _world.HeightMinThreshold)
+                {
+                    Life = 0;
+                    return;
+                }
 
                 switch (_direction)
                 {
@@ -49,8 +53,8 @@ public class WorldV2 : MonoBehaviour
                         X--;
                         break;
                 }
-                var creationResult = _world.MakeCell(X, Y, _height);
 
+                var creationResult = _world.MakeCell(X, Y, _height);
                 switch (creationResult.Status)
                 {
                     case CellCreationResultStatus.HitWorldBoundary:
@@ -67,10 +71,8 @@ public class WorldV2 : MonoBehaviour
 
         private WorldV2 _world;
         private WorldBuilderDirection _direction;
-
         private int X, Y;
         private float _height;
-
         private Queue<Vector2Int> _deferredCellsToCreate = new Queue<Vector2Int>();
     }
 
@@ -92,7 +94,7 @@ public class WorldV2 : MonoBehaviour
             X = x;
             Y = y;
             _height = height;
-            _healthDivider = Random.Range(_world.HealthDegredationDividerMin,_world.HealthDegredationDividerMax);
+            _healthDivider = Random.Range(_world.HealthDegredationDividerMin, _world.HealthDegredationDividerMax);
         }
 
         public MountainBuilderState State { get; set; } = MountainBuilderState.BuildingLines;
@@ -107,55 +109,63 @@ public class WorldV2 : MonoBehaviour
             {
                 case MountainBuilderState.BuildingLines:
                     Life--;
-                    _height -= Random.Range(_world.HeightDegredationMin,_world.HeightDegredationMax);
-                    switch (_direction)
+                    _height -= Random.Range(_world.HeightDegredationMin, _world.HeightDegredationMax);
+                    if (_height <= _world.HeightMinThreshold)
                     {
-                        case WorldBuilderDirection.North:
-                            Y++;
-                            break;
-                        case WorldBuilderDirection.South:
-                            Y--;
-                            break;
-                        case WorldBuilderDirection.East:
-                            X++;
-                            break;
-                        case WorldBuilderDirection.West:
-                            X--;
-                            break;
+                        Life = 0;
+                    }
+                    else
+                    {
+                        switch (_direction)
+                        {
+                            case WorldBuilderDirection.North:
+                                Y++;
+                                break;
+                            case WorldBuilderDirection.South:
+                                Y--;
+                                break;
+                            case WorldBuilderDirection.East:
+                                X++;
+                                break;
+                            case WorldBuilderDirection.West:
+                                X--;
+                                break;
+                        }
+
+                        var creationResult = _world.MakeCell(X, Y, _height);
+
+                        switch (creationResult.Status)
+                        {
+                            case CellCreationResultStatus.HitWorldBoundary:
+                                Life = 0;
+                                break;
+                            case CellCreationResultStatus.OtherCellAlreadyExisted:
+                                break;
+                            case CellCreationResultStatus.Success:
+                                creationResult.Cell.SetState(CellV2State.Animating);
+                                switch (_direction)
+                                {
+                                    case WorldBuilderDirection.North:
+                                        MakeLineHelper(WorldBuilderDirection.East);
+                                        MakeLineHelper(WorldBuilderDirection.West);
+                                        break;
+                                    case WorldBuilderDirection.South:
+                                        MakeLineHelper(WorldBuilderDirection.East);
+                                        MakeLineHelper(WorldBuilderDirection.West);
+                                        break;
+                                    case WorldBuilderDirection.East:
+                                        MakeLineHelper(WorldBuilderDirection.North);
+                                        MakeLineHelper(WorldBuilderDirection.South);
+                                        break;
+                                    case WorldBuilderDirection.West:
+                                        MakeLineHelper(WorldBuilderDirection.North);
+                                        MakeLineHelper(WorldBuilderDirection.South);
+                                        break;
+                                }
+                                break;
+                        }
                     }
 
-                    var creationResult = _world.MakeCell(X, Y, _height);
-
-                    switch (creationResult.Status)
-                    {
-                        case CellCreationResultStatus.HitWorldBoundary:
-                            Life = 0;
-                            break;
-                        case CellCreationResultStatus.OtherCellAlreadyExisted:
-                            break;
-                        case CellCreationResultStatus.Success:
-                            creationResult.Cell.SetState(CellV2State.Animating);
-                            switch (_direction)
-                            {
-                                case WorldBuilderDirection.North:
-                                    MakeLineHelper(WorldBuilderDirection.East);
-                                    MakeLineHelper(WorldBuilderDirection.West);
-                                    break;
-                                case WorldBuilderDirection.South:
-                                    MakeLineHelper(WorldBuilderDirection.East);
-                                    MakeLineHelper(WorldBuilderDirection.West);
-                                    break;
-                                case WorldBuilderDirection.East:
-                                    MakeLineHelper(WorldBuilderDirection.North);
-                                    MakeLineHelper(WorldBuilderDirection.South);
-                                    break;
-                                case WorldBuilderDirection.West:
-                                    MakeLineHelper(WorldBuilderDirection.North);
-                                    MakeLineHelper(WorldBuilderDirection.South);
-                                    break;
-                            }
-                            break;
-                    }
 
                     if (Life <= 0)
                     {
@@ -176,7 +186,7 @@ public class WorldV2 : MonoBehaviour
                     {
                         State = MountainBuilderState.Done;
                     }
-                    
+
                     break;
                 case MountainBuilderState.Done:
                     break;
@@ -186,7 +196,7 @@ public class WorldV2 : MonoBehaviour
 
         private void MakeLineHelper(WorldBuilderDirection direction)
         {
-            int life = Life / _healthDivider - Random.Range(_world.HealthDegredationMin,_world.HealthDegredationMax);
+            int life = Life / _healthDivider - Random.Range(_world.HealthDegredationMin, _world.HealthDegredationMax);
             MountainBuilderLineHelper helper = new MountainBuilderLineHelper(
                 _world,
                 direction,
@@ -237,7 +247,7 @@ public class WorldV2 : MonoBehaviour
 
     public float HeightDegredationMin = 1;
     public float HeightDegredationMax = 3;
-
+    public float HeightMinThreshold = 1.0f;
 
     public bool VerboseDebuggingEnabled = true;
 
@@ -284,7 +294,7 @@ public class WorldV2 : MonoBehaviour
     {
         if (x >= 0 && x < Dimensions && z >= 0 && z < Dimensions)
         {
-            int modifiedHealth = health / Random.Range(HealthDegredationDividerMin,HealthDegredationDividerMax);
+            int modifiedHealth = health / Random.Range(HealthDegredationDividerMin, HealthDegredationDividerMax);
             _currentBuilder = new MountainBuilder(this, direction, modifiedHealth, x, z, height);
             //Debug.Log("made world builder facing " + direction.ToString());
         }
