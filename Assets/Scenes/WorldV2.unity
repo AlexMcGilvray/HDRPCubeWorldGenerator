@@ -472,14 +472,16 @@ MonoBehaviour:
   CellStepAnimTimeTarget: 0.1
   AnimTimeTarget: 1
   InitialHealth: 155
-  InitialHeight: 15
   HealthDegredationDividerMin: 1
   HealthDegredationDividerMax: 4
   HealthDegredationMin: 1
   HealthDegredationMax: 4
+  InitialHeight: 55
   HeightDegredationMin: 0.05
   HeightDegredationMax: 0.5
   HeightMinThreshold: 0.05
+  ChanceSpawnChildMin: 0.005
+  ChanceSpawnChildMax: 0.05
   VerboseDebuggingEnabled: 0
   cellObjects: []
 --- !u!4 &705894307
