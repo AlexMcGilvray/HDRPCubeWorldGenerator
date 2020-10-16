@@ -1,8 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
+
+public static class LinqExtensions
+{
+    public static IEnumerable<T> Flatten<T>(this IEnumerable<T> e, System.Func<T, IEnumerable<T>> f)
+        => e.SelectMany(c => f(c).Flatten(f)).Concat(e);
+}
 public class WorldV2 : MonoBehaviour
 {
     // Creates a straight line with no branch logic for the mountain builder
@@ -104,7 +111,6 @@ public class WorldV2 : MonoBehaviour
 
         public void Step()
         {
-
             switch (State)
             {
                 case MountainBuilderState.BuildingLines:
@@ -131,7 +137,7 @@ public class WorldV2 : MonoBehaviour
                                 X--;
                                 break;
                         }
-
+                        // TODO roll a chance to see if we spawn a child here
                         var creationResult = _world.MakeCell(X, Y, _height);
 
                         switch (creationResult.Status)
@@ -143,29 +149,86 @@ public class WorldV2 : MonoBehaviour
                                 break;
                             case CellCreationResultStatus.Success:
                                 creationResult.Cell.SetState(CellV2State.Animating);
-                                switch (_direction)
+                                float childCreationChance = Mathf.Clamp(
+                                    Random.Range(_world.ChanceSpawnChildMin, _world.ChanceSpawnChildMax) - _mountainBulderChildSpawnChanceDegredation,
+                                    0.0f,
+                                    1.0f);
+                                _mountainBulderChildSpawnChanceDegredation -= 0.05f;
+                                bool shouldCreateChild = Random.Range(0.0f, childCreationChance) > 0.5f ? true : false;
+                                if (shouldCreateChild)
                                 {
-                                    case WorldBuilderDirection.North:
-                                        MakeLineHelper(WorldBuilderDirection.East);
-                                        MakeLineHelper(WorldBuilderDirection.West);
-                                        break;
-                                    case WorldBuilderDirection.South:
-                                        MakeLineHelper(WorldBuilderDirection.East);
-                                        MakeLineHelper(WorldBuilderDirection.West);
-                                        break;
-                                    case WorldBuilderDirection.East:
-                                        MakeLineHelper(WorldBuilderDirection.North);
-                                        MakeLineHelper(WorldBuilderDirection.South);
-                                        break;
-                                    case WorldBuilderDirection.West:
-                                        MakeLineHelper(WorldBuilderDirection.North);
-                                        MakeLineHelper(WorldBuilderDirection.South);
-                                        break;
+                                    bool randomChildSideCoinToss = Random.Range(0.0f, 1.0f) > 0.5f ? true : false;
+                                    if (randomChildSideCoinToss)
+                                    {
+                                        switch (_direction)
+                                        {
+                                            case WorldBuilderDirection.North:
+                                                MakeMountainBuilderChild(WorldBuilderDirection.East);
+                                                MakeLineHelper(WorldBuilderDirection.West);
+                                                break;
+                                            case WorldBuilderDirection.South:
+                                                MakeMountainBuilderChild(WorldBuilderDirection.East);
+                                                MakeLineHelper(WorldBuilderDirection.West);
+                                                break;
+                                            case WorldBuilderDirection.East:
+                                                MakeMountainBuilderChild(WorldBuilderDirection.North);
+                                                MakeLineHelper(WorldBuilderDirection.South);
+                                                break;
+                                            case WorldBuilderDirection.West:
+                                                MakeMountainBuilderChild(WorldBuilderDirection.North);
+                                                MakeLineHelper(WorldBuilderDirection.South);
+                                                break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        switch (_direction)
+                                        {
+                                            case WorldBuilderDirection.North:
+                                                MakeLineHelper(WorldBuilderDirection.East);
+                                                MakeMountainBuilderChild(WorldBuilderDirection.West);
+                                                break;
+                                            case WorldBuilderDirection.South:
+                                                MakeLineHelper(WorldBuilderDirection.East);
+                                                MakeMountainBuilderChild(WorldBuilderDirection.West);
+                                                break;
+                                            case WorldBuilderDirection.East:
+                                                MakeLineHelper(WorldBuilderDirection.North);
+                                                MakeMountainBuilderChild(WorldBuilderDirection.South);
+                                                break;
+                                            case WorldBuilderDirection.West:
+                                                MakeLineHelper(WorldBuilderDirection.North);
+                                                MakeMountainBuilderChild(WorldBuilderDirection.South);
+                                                break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+
+                                    switch (_direction)
+                                    {
+                                        case WorldBuilderDirection.North:
+                                            MakeLineHelper(WorldBuilderDirection.East);
+                                            MakeLineHelper(WorldBuilderDirection.West);
+                                            break;
+                                        case WorldBuilderDirection.South:
+                                            MakeLineHelper(WorldBuilderDirection.East);
+                                            MakeLineHelper(WorldBuilderDirection.West);
+                                            break;
+                                        case WorldBuilderDirection.East:
+                                            MakeLineHelper(WorldBuilderDirection.North);
+                                            MakeLineHelper(WorldBuilderDirection.South);
+                                            break;
+                                        case WorldBuilderDirection.West:
+                                            MakeLineHelper(WorldBuilderDirection.North);
+                                            MakeLineHelper(WorldBuilderDirection.South);
+                                            break;
+                                    }
                                 }
                                 break;
                         }
                     }
-
 
                     if (Life <= 0)
                     {
@@ -191,6 +254,10 @@ public class WorldV2 : MonoBehaviour
                 case MountainBuilderState.Done:
                     break;
             }
+            foreach (var child in _mountainBuilderChildren)
+            {
+                child.Step();
+            }
 
         }
 
@@ -208,6 +275,25 @@ public class WorldV2 : MonoBehaviour
             _lineHelpers.Add(helper);
         }
 
+        private void MakeMountainBuilderChild(WorldBuilderDirection direction)
+        {
+            int life = (Life / _healthDivider) - Random.Range(_world.HealthDegredationMin, _world.HealthDegredationMax);
+            MountainBuilder builder = new MountainBuilder(
+                _world,
+                direction,
+                life,
+                X,
+                Y,
+                _height);
+            _mountainBuilderChildren.Add(builder);
+        }
+
+        private bool AreAllDescendantsDead()
+        {
+            IEnumerable<MountainBuilder> flattenedElements = _mountainBuilderChildren.Flatten(x => x._mountainBuilderChildren);
+            return flattenedElements.Any(x => x.Alive);
+        }
+
         private WorldV2 _world;
         private WorldBuilderDirection _direction;
         private int X, Y;
@@ -215,6 +301,9 @@ public class WorldV2 : MonoBehaviour
         private int _healthDivider;
         private List<MountainBuilderLineHelper> _lineHelpers =
             new List<MountainBuilderLineHelper>();
+        private List<MountainBuilder> _mountainBuilderChildren =
+            new List<MountainBuilder>();
+        private float _mountainBulderChildSpawnChanceDegredation = 0.05f;
     }
 
     public enum WorldBuilderDirection { North, South, East, West }
@@ -250,6 +339,9 @@ public class WorldV2 : MonoBehaviour
     public float HeightDegredationMin = 1;
     public float HeightDegredationMax = 3;
     public float HeightMinThreshold = 1.0f;
+
+    public float ChanceSpawnChildMin = 0.005f;
+    public float ChanceSpawnChildMax = 0.05f;
 
     [Header("Debug")]
     public bool VerboseDebuggingEnabled = true;
