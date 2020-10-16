@@ -476,8 +476,8 @@ MonoBehaviour:
   HealthDegredationDividerMin: 1
   HealthDegredationDividerMax: 4
   HealthDegredationMin: 1
-  HealthDegredationMax: 3
-  HeightDegredationMin: 1
+  HealthDegredationMax: 4
+  HeightDegredationMin: 0.05
   HeightDegredationMax: 0.5
   HeightMinThreshold: 0.05
   VerboseDebuggingEnabled: 0

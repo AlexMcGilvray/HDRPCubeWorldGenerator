@@ -196,7 +196,7 @@ public class WorldV2 : MonoBehaviour
 
         private void MakeLineHelper(WorldBuilderDirection direction)
         {
-            int life = Life / _healthDivider - Random.Range(_world.HealthDegredationMin, _world.HealthDegredationMax);
+            int life = (Life / _healthDivider) - Random.Range(_world.HealthDegredationMin, _world.HealthDegredationMax);
             MountainBuilderLineHelper helper = new MountainBuilderLineHelper(
                 _world,
                 direction,
@@ -231,24 +231,27 @@ public class WorldV2 : MonoBehaviour
     }
 
     public GameObject cellTemplate;
+
+    [Header("World settings")]
     public int Dimensions = 20;
     public float CellSize = 10;
+
+    [Header("World generation animation time settings")]
     public float CellStepAnimTimeTarget = 0.5f;
     public float AnimTimeTarget = 0.5f;
+
+    [Header("Mountain builder settings")]
     public int InitialHealth = 5;
-    public float InitialHeight = 10;
-
     public int HealthDegredationDividerMin = 1;
-
     public int HealthDegredationDividerMax = 3;
-
     public int HealthDegredationMin = 1;
     public int HealthDegredationMax = 3;
-
+    public float InitialHeight = 10;
     public float HeightDegredationMin = 1;
     public float HeightDegredationMax = 3;
     public float HeightMinThreshold = 1.0f;
 
+    [Header("Debug")]
     public bool VerboseDebuggingEnabled = true;
 
     public List<GameObject> cellObjects;
