@@ -63,6 +63,12 @@ public class WorldV2 : MonoBehaviour
         private int X, Y;
         private float _height;
     }
+
+    // 1 : Spawn a mountain builder line and then let it animate out its line
+    //      while periodically queuing operations to spawn child lines along the lines
+    //      path. Once the line completes it triggers its children to run and so on.
+    //      Any cell that doesn't have a line 
+    // 2 : Once all ancestor lines have triggered 
     public class MountainBuilder
     {
         public MountainBuilder(
