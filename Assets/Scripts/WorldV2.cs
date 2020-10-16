@@ -90,6 +90,7 @@ public class WorldV2 : MonoBehaviour
             X = x;
             Y = y;
             _height = height;
+            _healthDivider = Random.Range(_world.HealthDegredationDividerMin,_world.HealthDegredationDividerMax);
         }
 
         public MountainBuilderState State { get; set; } = MountainBuilderState.BuildingLines;
@@ -182,10 +183,11 @@ public class WorldV2 : MonoBehaviour
 
         private void MakeLineHelper(WorldBuilderDirection direction)
         {
+            int life = Life / _healthDivider - Random.Range(_world.HealthDegredationMin,_world.HealthDegredationMax);
             MountainBuilderLineHelper helper = new MountainBuilderLineHelper(
                 _world,
                 direction,
-                Life / 2,
+                life,
                 X,
                 Y,
                 _height
@@ -197,7 +199,7 @@ public class WorldV2 : MonoBehaviour
         private WorldBuilderDirection _direction;
         private int X, Y;
         private float _height;
-
+        private int _healthDivider;
         private List<MountainBuilderLineHelper> _lineHelpers =
             new List<MountainBuilderLineHelper>();
     }
@@ -221,6 +223,13 @@ public class WorldV2 : MonoBehaviour
     public float AnimTimeTarget = 0.5f;
     public int InitialHealth = 5;
     public float InitialHeight = 10;
+
+    public int HealthDegredationDividerMin = 1;
+
+    public int HealthDegredationDividerMax = 3;
+
+    public int HealthDegredationMin = 1;
+    public int HealthDegredationMax = 3;
 
     public bool VerboseDebuggingEnabled = true;
 
@@ -267,7 +276,8 @@ public class WorldV2 : MonoBehaviour
     {
         if (x >= 0 && x < Dimensions && z >= 0 && z < Dimensions)
         {
-            _currentBuilder = new MountainBuilder(this, direction, health, x, z, height);
+            int modifiedHealth = health / Random.Range(HealthDegredationDividerMin,HealthDegredationDividerMax);
+            _currentBuilder = new MountainBuilder(this, direction, modifiedHealth, x, z, height);
             //Debug.Log("made world builder facing " + direction.ToString());
         }
     }
