@@ -220,6 +220,7 @@ public class WorldV2 : MonoBehaviour
     public GameObject cellTemplate;
     public int Dimensions = 20;
     public float CellSize = 10;
+    public float CellStepAnimTimeTarget = 0.5f;
     public float AnimTimeTarget = 0.5f;
     public int InitialHealth = 5;
     public float InitialHeight = 10;
@@ -296,7 +297,7 @@ public class WorldV2 : MonoBehaviour
             _animTimeCurrent = 0;
         }
 
-        if (_animTimeCurrent >= AnimTimeTarget)
+        if (_animTimeCurrent >= CellStepAnimTimeTarget)
         {
             StepWorldGeneration();
             _animTimeCurrent = 0;

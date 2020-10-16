@@ -469,9 +469,13 @@ MonoBehaviour:
   cellTemplate: {fileID: 453784652}
   Dimensions: 111
   CellSize: 10
-  AnimTimeTarget: 0.02
+  AnimTimeTarget: 3
   InitialHealth: 55
-  InitialHeight: 10
+  InitialHeight: 111
+  HealthDegredationDividerMin: 1
+  HealthDegredationDividerMax: 4
+  HealthDegredationMin: 1
+  HealthDegredationMax: 3
   VerboseDebuggingEnabled: 0
   cellObjects: []
 --- !u!4 &705894307
