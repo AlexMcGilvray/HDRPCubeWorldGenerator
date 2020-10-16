@@ -58,6 +58,7 @@ public class WorldV2 : MonoBehaviour
                         break;
                     case CellCreationResultStatus.Success:
                         creationResult.Cell.SetState(CellV2State.Animating);
+                        _height -= Random.Range(_world.HeightDegredationMin,_world.HeightDegredationMax);
                         break;
                 }
             }
@@ -105,6 +106,7 @@ public class WorldV2 : MonoBehaviour
             {
                 case MountainBuilderState.BuildingLines:
                     Life--;
+                    _height -= Random.Range(_world.HeightDegredationMin,_world.HeightDegredationMax);
                     switch (_direction)
                     {
                         case WorldBuilderDirection.North:
@@ -231,6 +233,10 @@ public class WorldV2 : MonoBehaviour
 
     public int HealthDegredationMin = 1;
     public int HealthDegredationMax = 3;
+
+    public float HeightDegredationMin = 1;
+    public float HeightDegredationMax = 3;
+
 
     public bool VerboseDebuggingEnabled = true;
 
