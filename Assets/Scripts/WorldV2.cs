@@ -95,21 +95,21 @@ public class WorldV2 : MonoBehaviour
             if (Alive)
             {
                 Life--;
-                                    switch (_direction)
-                        {
-                            case WorldBuilderDirection.North:
-                                Y++;
-                                break;
-                            case WorldBuilderDirection.South:
-                                Y--;
-                                break;
-                            case WorldBuilderDirection.East:
-                                X++;
-                                break;
-                            case WorldBuilderDirection.West:
-                                X--;
-                                break;
-                        }
+                switch (_direction)
+                {
+                    case WorldBuilderDirection.North:
+                        Y++;
+                        break;
+                    case WorldBuilderDirection.South:
+                        Y--;
+                        break;
+                    case WorldBuilderDirection.East:
+                        X++;
+                        break;
+                    case WorldBuilderDirection.West:
+                        X--;
+                        break;
+                }
 
                 var creationResult = _world.MakeCell(X, Y, _height);
 
@@ -119,7 +119,7 @@ public class WorldV2 : MonoBehaviour
                         Life = 0;
                         break;
                     case CellCreationResultStatus.OtherCellAlreadyExisted:
-          
+
                         break;
                     case CellCreationResultStatus.Success:
                         creationResult.Cell.SetState(CellV2State.Animating);
