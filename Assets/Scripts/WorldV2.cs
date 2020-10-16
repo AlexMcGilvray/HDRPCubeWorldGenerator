@@ -32,6 +32,8 @@ public class WorldV2 : MonoBehaviour
             if (Alive)
             {
                 Life--;
+                _height -= Random.Range(_world.HeightDegredationMin,_world.HeightDegredationMax);
+
                 switch (_direction)
                 {
                     case WorldBuilderDirection.North:
@@ -58,7 +60,6 @@ public class WorldV2 : MonoBehaviour
                         break;
                     case CellCreationResultStatus.Success:
                         creationResult.Cell.SetState(CellV2State.Animating);
-                        _height -= Random.Range(_world.HeightDegredationMin,_world.HeightDegredationMax);
                         break;
                 }
             }
