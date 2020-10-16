@@ -31,28 +31,33 @@ public class WorldV2 : MonoBehaviour
             if (Alive)
             {
                 Life--;
+                var creationResult = _world.MakeCell(X, Y, _height);
 
-                if (_world.MakeCell(X, Y, _height) == CellCreationResult.HitWorldBoundary)
+                switch (creationResult.Status)
                 {
-                    Life = 0;
-                    return;
-                }
+                    case CellCreationResultStatus.HitWorldBoundary:
+                        Life = 0;
+                        break;
+                    case CellCreationResultStatus.OtherCellAlreadyExisted:
+                        break;
+                    case CellCreationResultStatus.Success:
+                        switch (_direction)
+                        {
+                            case WorldBuilderDirection.North:
+                                Y++;
+                                break;
+                            case WorldBuilderDirection.South:
+                                Y--;
+                                break;
+                            case WorldBuilderDirection.East:
+                                X++;
+                                break;
+                            case WorldBuilderDirection.West:
+                                X--;
+                                break;
 
-                switch (_direction)
-                {
-                    case WorldBuilderDirection.North:
-                        Y++;
+                        }
                         break;
-                    case WorldBuilderDirection.South:
-                        Y--;
-                        break;
-                    case WorldBuilderDirection.East:
-                        X++;
-                        break;
-                    case WorldBuilderDirection.West:
-                        X--;
-                        break;
-
                 }
             }
         }
@@ -91,39 +96,44 @@ public class WorldV2 : MonoBehaviour
             {
                 Life--;
 
-                if (_world.MakeCell(X, Y, _height) == CellCreationResult.HitWorldBoundary)
+                var creationResult = _world.MakeCell(X, Y, _height);
+                switch (creationResult.Status)
                 {
-                    Life = 0;
-                }
-                else
-                {
-                    switch (_direction)
-                    {
-                        case WorldBuilderDirection.North:
-                            MakeLineHelper(WorldBuilderDirection.East);
-                            MakeLineHelper(WorldBuilderDirection.West);
-                            Y++;
-                            break;
-                        case WorldBuilderDirection.South:
-                            MakeLineHelper(WorldBuilderDirection.East);
-                            MakeLineHelper(WorldBuilderDirection.West);
-                            Y--;
-                            break;
-                        case WorldBuilderDirection.East:
-                            MakeLineHelper(WorldBuilderDirection.North);
-                            MakeLineHelper(WorldBuilderDirection.South);
-                            X++;
-                            break;
-                        case WorldBuilderDirection.West:
-                            MakeLineHelper(WorldBuilderDirection.North);
-                            MakeLineHelper(WorldBuilderDirection.South);
-                            X--;
-                            break;
+                    case CellCreationResultStatus.HitWorldBoundary:
+                        Life = 0;
+                        break;
+                    case CellCreationResultStatus.OtherCellAlreadyExisted:
+                        break;
+                    case CellCreationResultStatus.Success:
+                        switch (_direction)
+                        {
+                            case WorldBuilderDirection.North:
+                                MakeLineHelper(WorldBuilderDirection.East);
+                                MakeLineHelper(WorldBuilderDirection.West);
+                                Y++;
+                                break;
+                            case WorldBuilderDirection.South:
+                                MakeLineHelper(WorldBuilderDirection.East);
+                                MakeLineHelper(WorldBuilderDirection.West);
+                                Y--;
+                                break;
+                            case WorldBuilderDirection.East:
+                                MakeLineHelper(WorldBuilderDirection.North);
+                                MakeLineHelper(WorldBuilderDirection.South);
+                                X++;
+                                break;
+                            case WorldBuilderDirection.West:
+                                MakeLineHelper(WorldBuilderDirection.North);
+                                MakeLineHelper(WorldBuilderDirection.South);
+                                X--;
+                                break;
 
-                    }
+                        }
+                        break;
                 }
             }
-            foreach(var helper in _lineHelpers)
+
+            foreach (var helper in _lineHelpers)
             {
                 if (helper.Alive)
                 {
@@ -137,7 +147,7 @@ public class WorldV2 : MonoBehaviour
             MountainBuilderLineHelper helper = new MountainBuilderLineHelper(
                 _world,
                 direction,
-                Life,
+                Life / 4,
                 X,
                 Y,
                 _height
@@ -159,7 +169,13 @@ public class WorldV2 : MonoBehaviour
         North, South, East, West
     }
 
-    public enum CellCreationResult
+    public class CellCreationResult
+    {
+        public CellCreationResultStatus Status { get; set; }
+        public CellV2 Cell { get; set; }
+    }
+
+    public enum CellCreationResultStatus
     {
         Success, HitWorldBoundary, OtherCellAlreadyExisted
     }
@@ -254,17 +270,20 @@ public class WorldV2 : MonoBehaviour
 
     CellCreationResult MakeCell(int x, int z, float height)
     {
+        CellCreationResult result = new CellCreationResult();
         if (VerboseDebuggingEnabled)
         {
             Debug.Log("making cell x " + x + " and z " + z);
         }
         if (x < 0 || x >= Dimensions || z < 0 || z >= Dimensions)
         {
-            return CellCreationResult.HitWorldBoundary;
+            result.Status = CellCreationResultStatus.HitWorldBoundary;
+            return result;
         }
         if (cellObjects[z * Dimensions + x] != null)
         {
-            return CellCreationResult.OtherCellAlreadyExisted;
+            result.Status = CellCreationResultStatus.OtherCellAlreadyExisted;
+            return result;
         }
         float xCoord = x * CellSize - (Dimensions / 2) * CellSize;
         float zCoord = z * CellSize - (Dimensions / 2) * CellSize;
@@ -273,7 +292,9 @@ public class WorldV2 : MonoBehaviour
         cellObjects[z * Dimensions + x] = cellObject;
         var cell = cellObject.GetComponent<CellV2>();
         cell.MakeCell(height, CellSize / 2, AnimTimeTarget);
-        return CellCreationResult.Success;
+        result.Status = CellCreationResultStatus.Success;
+        result.Cell = cell;
+        return result;
     }
 
     private float _animTimeCurrent;
