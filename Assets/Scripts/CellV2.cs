@@ -12,6 +12,13 @@ public enum CellV2FaceDirection
     West
 }
 
+public enum CellV2State
+{
+    Idle,
+    Animating,
+    Frozen
+}
+
 public class FaceInfo
 {
     public int[] RenderVertexIndices { get; } = new int[4]; // can be used to look up vertex, normal, uv's
@@ -22,6 +29,10 @@ public class FaceInfo
 public class CellV2 : MonoBehaviour
 {
     public Material worldMaterial;
+
+    public CellV2State State { get; private set; } = CellV2State.Idle;
+
+    public void SetState(CellV2State state) { State = state;}
 
     void Start()
     {
@@ -381,38 +392,51 @@ public class CellV2 : MonoBehaviour
 
     void Update()
     {
-        if (_heightAnimationTimeCurrent > 0f)
+        void UpdateAnimating()
         {
-            _heightAnimationTimeCurrent -= Time.deltaTime;
-
-            _heightAnimationTimeCurrent = Mathf.Clamp(
-                _heightAnimationTimeCurrent,
-                0f,
-                _heightAnimationTimeTarget);
-
-            float currentHeight =
-                (1 - (_heightAnimationTimeCurrent / _heightAnimationTimeTarget)) * _height;
-            //Debug.Log("currentHeight  is " + currentHeight);
-            //Debug.Log("height  is " + currentHeight);
-
-            var topRenderVertices = GetAllTopRenderVertices();
-            //Debug.Log("vertex count  is " + topRenderVertices.Count);
-            foreach (var renderVertexIndex in GetAllTopRenderVertices())
+            if (_heightAnimationTimeCurrent > 0f)
             {
-                _renderVertices[renderVertexIndex].y = currentHeight;
+                _heightAnimationTimeCurrent -= Time.deltaTime;
+
+                _heightAnimationTimeCurrent = Mathf.Clamp(
+                    _heightAnimationTimeCurrent,
+                    0f,
+                    _heightAnimationTimeTarget);
+
+                float currentHeight =
+                    (1 - (_heightAnimationTimeCurrent / _heightAnimationTimeTarget)) * _height;
+                //Debug.Log("currentHeight  is " + currentHeight);
+                //Debug.Log("height  is " + currentHeight);
+
+                var topRenderVertices = GetAllTopRenderVertices();
+                //Debug.Log("vertex count  is " + topRenderVertices.Count);
+                foreach (var renderVertexIndex in GetAllTopRenderVertices())
+                {
+                    _renderVertices[renderVertexIndex].y = currentHeight;
+                }
+
+                if (_mesh != null)
+                {
+                    _meshFilter.mesh.vertices = _renderVertices;
+                }
             }
-
-            if (_mesh != null)
+            else
             {
-                _meshFilter.mesh.vertices = _renderVertices;
+                if (_mesh != null)
+                {
+                    _meshFilter.mesh.RecalculateBounds();
+                }
             }
         }
-        else
+        switch (State)
         {
-            if (_mesh != null)
-            {
-                _meshFilter.mesh.RecalculateBounds();
-            }
+            case CellV2State.Idle:
+                break;
+            case CellV2State.Animating:
+                UpdateAnimating();
+                break;
+            case CellV2State.Frozen:
+                break;
         }
     }
 
