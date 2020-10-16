@@ -30,7 +30,9 @@ public class CellV2 : MonoBehaviour
 {
     public Material worldMaterial;
 
-    public CellV2State State { get; set; } = CellV2State.Idle;
+    public CellV2State State { get; private set; } = CellV2State.Idle;
+
+    public void SetState(CellV2State state) { State = state;}
 
     void Start()
     {
