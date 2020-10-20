@@ -31,6 +31,7 @@ public class NaiveRendering_CellGrid : MonoBehaviour
                 cellObjects[z * Dimensions + x] = cellObject;
                 var cell = cellObject.GetComponent<CellV2>();
                 cell.MakeCell(Height, CellSize / 2, 1.0f);
+                cell.SetState(CellV2State.Animating);
             }
         }
     }
