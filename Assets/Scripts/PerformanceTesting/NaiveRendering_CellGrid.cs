@@ -4,13 +4,10 @@ using UnityEngine;
 
 public class NaiveRendering_CellGrid : MonoBehaviour
 {
-
     public int Dimensions = 10;
     public float Height = 1.0f;
-    public int CellSize = 1;
-
+    public float CellSize = 1;
     public GameObject CellTemplate;
-
     public List<GameObject> cellObjects;
 
     void Start()
@@ -40,7 +37,4 @@ public class NaiveRendering_CellGrid : MonoBehaviour
     {
 
     }
-
-
-
 }

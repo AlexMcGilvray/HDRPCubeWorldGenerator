@@ -541,9 +541,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92d8a401971624c48b9a0937b9e89b92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Dimensions: 10
-  Height: 2
-  CellSize: 2
+  Dimensions: 64
+  Height: 1
+  CellSize: 1
   CellTemplate: {fileID: 1528626956}
   cellObjects: []
 --- !u!4 &806760848
